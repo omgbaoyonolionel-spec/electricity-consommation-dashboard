@@ -12,7 +12,7 @@ dépendront eux aussi uniquement des ports du domaine.
 
 import logging
 
-from app.domain.ports import DeviceClientPort, ReadingRepositoryPort
+from src.domain.ports import DeviceClientPort, ReadingRepositoryPort
  
 logger = logging.getLogger(__name__)
 

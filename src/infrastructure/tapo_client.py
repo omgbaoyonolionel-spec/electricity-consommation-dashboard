@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 
 from tapo import ApiClient
 
-from app.domain.models import DeviceReading
-from app.domain.ports import DeviceClientPort
+from src.domain.models import DeviceReading
+from src.domain.ports import DeviceClientPort
 
 
 class TapoDeviceClient(DeviceClientPort):

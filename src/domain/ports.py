@@ -12,7 +12,7 @@ d'implémenter ces ports, sans toucher au domaine ni aux cas d'usage.
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from app.domain.models import DeviceReading
+from src.domain.models import DeviceReading
 
 
 class DeviceClientPort(ABC):

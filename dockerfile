@@ -5,8 +5,7 @@ WORKDIR /code
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app
-COPY alembic.ini .
-COPY alembic/ ./alembic
+COPY src/ ./src
+COPY main.py .
 
-CMD ["python", "-m", "app.main", "--loop", "300"]
+CMD ["python", "main.py", "--loop", "300"]

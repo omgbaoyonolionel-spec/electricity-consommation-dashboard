@@ -13,21 +13,12 @@ services:
       - "5432:5432"
     volumes:
       - tapo_pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U tapo"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  migrate:
-    build: .
-    container_name: tapo_migrate
-    env_file: .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: ["alembic", "upgrade", "head"]
-    restart: "no"
 
   collector:
     build: .
@@ -35,10 +26,10 @@ services:
     restart: unless-stopped
     env_file: .env
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
     # Intervalle de collecte en secondes (300 = 5 minutes), modifiable :
-    command: ["python", "-m", "app.main", "--loop", "300"]
+    command: ["python", "main.py", "--loop", "300"]
 
 volumes:
   tapo_pgdata:

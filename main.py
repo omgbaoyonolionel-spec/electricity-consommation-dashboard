@@ -11,10 +11,10 @@ import argparse
 import asyncio
 import logging
 
-from app.application.collect_readings import CollectReadingsUseCase
-from app.infrastructure.config import Settings
-from app.infrastructure.postgres_repository import PostgresReadingRepository
-from app.infrastructure.tapo_client import TapoDeviceClient
+from src.application.collect_readings import CollectReadingsUseCase
+from src.infrastructure.config import Settings
+from src.infrastructure.postgres_repository import PostgresReadingRepository
+from src.infrastructure.tapo_client import TapoDeviceClient
 
 logger = logging.getLogger(__name__)
 

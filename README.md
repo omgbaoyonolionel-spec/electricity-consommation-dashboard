@@ -19,9 +19,10 @@ src/
 │   ├── config.py                #   Chargement de la config (variables d'env)
 │   ├── tapo_client.py           #   Implémente DeviceClientPort avec la lib `tapo`
 │   └── postgres_repository.py   #   Implémente ReadingRepositoryPort avec `asyncpg`
-├── application/                 # Cas d'usage — orchestrent via les ports uniquement
-│   └── collect_readings.py      #   CollectReadingsUseCase (collecte + sauvegarde)
-└── main.py                      # Point de composition : assemble tout et lance
+└── application/                 # Cas d'usage — orchestrent via les ports uniquement
+    └── collect_readings.py      #   CollectReadingsUseCase (collecte + sauvegarde)
+main.py                          # Point de composition : assemble tout et lance
+schema.sql                       # Schéma PostgreSQL, appliqué automatiquement au démarrage du conteneur postgres
 ```
 
 **Règle de dépendance** : `domain` ne dépend de rien ; `application` ne
@@ -33,7 +34,7 @@ fichier autorisé à connaître toutes les couches en même temps.
 
 Exemple : calculer un résumé quotidien de consommation.
 
-1. Créez `app/application/compute_daily_summary.py`, une classe qui prend
+1. Créez `src/application/compute_daily_summary.py`, une classe qui prend
    en dépendance `ReadingRepositoryPort` (déjà doté d'une méthode
    `find_by_device` prête pour ce genre de besoin) et implémente sa logique
    dans une méthode `execute(...)`.
@@ -46,23 +47,14 @@ Exemple : calculer un résumé quotidien de consommation.
    une méthode au port concerné dans `domain/ports.py`, puis implémentez-la
    dans `infrastructure/postgres_repository.py`.
 
-### Pydantic et Alembic
+### Pydantic
 
-- **Pydantic** : `Device` et `DeviceReading` (`app/domain/models.py`) sont des
-  modèles Pydantic (validation automatique, immuables, sérialisables en
-  JSON). La configuration (`app/infrastructure/config.py`) utilise
-  `pydantic-settings` pour valider les variables d'environnement au
-  démarrage — une variable manquante ou une prise mal configurée est
-  détectée immédiatement, avec un message clair.
-- **Alembic** gère désormais le schéma de la base (dossier `alembic/`), à la
-  place de l'ancien `schema.sql` appliqué une seule fois. Pour créer une
-  nouvelle migration après avoir modifié le schéma :
-  ```bash
-  alembic revision -m "description du changement"
-  ```
-  Éditez le fichier généré dans `alembic/versions/` (fonctions `upgrade()` /
-  `downgrade()`), puis appliquez avec `alembic upgrade head` (fait
-  automatiquement par le service `migrate` au démarrage de Docker Compose).
+`Device` et `DeviceReading` (`src/domain/models.py`) sont des modèles
+Pydantic (validation automatique, immuables, sérialisables en JSON). La
+configuration (`src/infrastructure/config.py`) utilise `pydantic-settings`
+pour valider les variables d'environnement au démarrage — une variable
+manquante ou une prise mal configurée est détectée immédiatement, avec un
+message clair.
 
 ## Méthode recommandée : tout via Docker (automatique et permanent)
 
@@ -98,11 +90,10 @@ et `.env` (`tapo_password`).
 docker compose up -d --build
 ```
 
-Cela démarre PostgreSQL, applique automatiquement les migrations Alembic
-(service `migrate`, s'exécute une fois puis s'arrête), puis démarre le
-collecteur, qui interroge vos prises toutes les 5 minutes (modifiable dans
-`docker-compose.yml`, argument `--loop 300`, en secondes) et écrit dans la
-base.
+Cela démarre PostgreSQL (schéma appliqué automatiquement via `schema.sql`)
+puis le collecteur, qui interroge vos prises toutes les 5 minutes
+(modifiable dans `docker-compose.yml`, argument `--loop 300`, en secondes)
+et écrit dans la base.
 
 ### 3. Vérifier que ça tourne
 
@@ -133,10 +124,74 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 export $(cat .env | xargs)   # ou chargez .env autrement
-alembic upgrade head          # applique les migrations sur votre Postgres local
-python -m app.main            # une seule collecte
-python -m app.main --loop 300 # collecte en boucle
+python main.py                # une seule collecte
+python main.py --loop 300     # collecte en boucle
 ```
+
+Avec [uv](https://docs.astral.sh/uv/) à la place de `venv`/`pip` :
+
+```bash
+uv venv
+uv pip install -r requirements.txt
+.venv\Scripts\activate        # Windows — sous Linux/macOS : source .venv/bin/activate
+python main.py --loop 300
+```
+
+## Commandes utiles
+
+```bash
+# Démarrer / reconstruire les conteneurs
+docker compose up -d --build
+
+# État des conteneurs (démarré ? healthy ?)
+docker compose ps
+
+# Suivre les logs du collecteur (Ctrl+C pour quitter)
+docker compose logs -f collector
+
+# Redémarrer le collecteur avec la config .env à jour (après avoir édité .env)
+docker compose up -d --force-recreate collector
+
+# Tout arrêter (les données restent dans le volume tapo_pgdata)
+docker compose down
+
+# Requête SQL ponctuelle sans ouvrir de shell
+docker exec tapo_postgres psql -U tapo -d tapo -c "SELECT * FROM tapo_readings ORDER BY timestamp DESC LIMIT 10;"
+
+# Ouvrir un shell psql interactif
+docker exec -it tapo_postgres psql -U tapo -d tapo
+```
+
+## Visualiser les données
+
+### Ligne de commande
+
+```bash
+docker exec tapo_postgres psql -U tapo -d tapo -c "SELECT * FROM tapo_readings ORDER BY timestamp DESC LIMIT 10;"
+```
+
+### pgAdmin (en local)
+
+Le conteneur `postgres` publie son port sur la machine hôte (`localhost:5432`),
+donc pgAdmin (ou DBeaver, TablePlus...) s'y connecte directement, sans rien
+configurer côté Docker :
+
+1. Vérifiez que le conteneur tourne : `docker compose ps` doit montrer
+   `tapo_postgres` en état `healthy`.
+2. Dans pgAdmin : clic droit sur **Servers** → **Register → Server...**
+3. Onglet **General** : donnez-lui un nom (ex. `tapo`).
+4. Onglet **Connection** :
+   - **Host name/address** : `localhost` (uniquement le host, sans le port)
+   - **Port** : `5432`
+   - **Maintenance database** : `tapo`
+   - **Username** : `tapo`
+   - **Password** : la valeur de `POSTGRES_PASSWORD` dans `docker-compose.yaml`
+     (= `PG_DSN`/`PGADMIN_PG_PASSWORD` dans `.env`)
+   - Activez **Save password?** puis **Save**.
+5. Dans l'arborescence : **Servers → tapo → Databases → tapo → Schemas →
+   public → Tables → tapo_readings**, clic droit → **View/Edit Data → All
+   Rows** pour voir le contenu, ou l'icône éclair (**Query Tool**) pour taper
+   du SQL directement.
 
 ## Notes
 
@@ -144,5 +199,6 @@ python -m app.main --loop 300 # collecte en boucle
   en watt-heures (champs renvoyés nativement par la prise).
 - Si une prise change d'IP (pas de réservation DHCP), le collecteur échouera
   pour cette prise seulement — pensez à fixer les IP.
-- Pour visualiser les courbes, vous pouvez brancher Grafana sur cette base
-  PostgreSQL, ou interroger directement via psql/DBeaver.
+- Pour visualiser les données : voir la section [Visualiser les données](#visualiser-les-données)
+  ci-dessus (psql ou pgAdmin). Pour de vrais graphiques, vous pouvez aussi
+  brancher Grafana sur cette base PostgreSQL.

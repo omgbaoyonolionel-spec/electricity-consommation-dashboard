@@ -8,10 +8,10 @@ par une autre base (TimescaleDB, SQLite pour les tests...) se fait en
 from datetime import datetime
 import asyncpg
  
-from app.domain.models import DeviceReading
-from app.domain.ports import ReadingRepositoryPort
+from src.domain.models import DeviceReading
+from src.domain.ports import ReadingRepositoryPort
 
-INSER_SQL = """
+_INSERT_SQL = """
 INSERT INTO tapo_readings
         (device_name, ip, "timestamp", current_power_mw,
          today_energy_wh, month_energy_wh, on_state)
@@ -29,9 +29,14 @@ _SELECT_SQL = """
 class PostgresReadingRepository(ReadingRepositoryPort):
     def __init__(self, pool: asyncpg.Pool) -> None:
         self._pool = pool
-    
+
+    @classmethod
+    async def create(cls, dsn: str) -> "PostgresReadingRepository":
+        pool = await asyncpg.create_pool(dsn)
+        return cls(pool)
+
     async def save(self, reading: DeviceReading) -> None:
-        async with self.pool.acquire() as conn:
+        async with self._pool.acquire() as conn:
             await conn.execute(
                 _INSERT_SQL,
                 reading.device_name,

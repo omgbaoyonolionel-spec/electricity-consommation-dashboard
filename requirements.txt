@@ -1,0 +1,5 @@
+tapo>=0.7
+asyncpg>=0.29
+python-dotenv>=1.0
+pydantic>=2.6
+pydantic-settings>=2.2
