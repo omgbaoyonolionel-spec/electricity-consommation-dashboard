@@ -128,6 +128,10 @@ python main.py                # une seule collecte
 python main.py --loop 300     # collecte en boucle
 ```
 
+> ⚠️ Sous Windows, la commande `export $(cat .env | xargs)` ne fonctionne pas
+> (Git Bash la gère mal si des valeurs contiennent des espaces, et PowerShell ne
+> la connaît pas). Préférez la méthode `uv` ci-dessous.
+
 Avec [uv](https://docs.astral.sh/uv/) à la place de `venv`/`pip` :
 
 ```bash
