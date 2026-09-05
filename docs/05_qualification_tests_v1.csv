@@ -1,0 +1,7 @@
+test_id,cible,regle,n_teste,n_echec,statut,detail,execute_le,version
+COHERENCE,a_min/moy/max_act_power,p_min*0.95 <= energie*60 <= p_max*1.05 si p_max>100W,6362,12,PASS_AVEC_EXCLUES,echecs attendus = les 32 en quarantaine ; surplus = anomalie nouvelle,2026-09-05 14:54:41.859041+00,1.0.0
+CROISSANCE,compteurs a vie A/B/C,compteur(t2) >= compteur(t1),1,0,NON_TESTABLE_EN_BASE,une seule observation (sonde 05/09 : A=59690.46 Wh) ; le test exige une serie -> sonde quotidienne EMData.GetStatus recommandee,2026-09-05 14:55:00.599699+00,1.0.0
+NULL,5 colonnes cles voie A,taux NULL < 5 pct,32215,0,PASS,les minutes absentes ne sont pas des NULL : couverture,2026-09-05 14:53:57.055626+00,1.0.0
+PLAGE,U/I/P voie A,U 100..300 (hors 0) ; I 0..63 ; P -14500..14500,19329,0,PASS,"conformite 207..253 = analyse, pas rejet",2026-09-05 14:54:12.846042+00,1.0.0
+STABILITE,a_avg_voltage,delta U < 40 V entre minutes consecutives,6382,0,PASS,transitoires legitimes sur P : test limite a U,2026-09-05 14:54:26.399325+00,1.0.0
+TYPE,shelly_minute.*,colonnes de mesure numeriques,48,0,PASS,types via information_schema,2026-09-05 14:53:41.998713+00,1.0.0
