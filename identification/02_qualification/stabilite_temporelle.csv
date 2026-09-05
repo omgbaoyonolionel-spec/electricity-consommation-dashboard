@@ -1,0 +1,3 @@
+variable,n,moyenne,ecart_type,bruit_median_delta,derive_j1_vs_jn,transitoires_sup_3x_bruit,commentaire,execute_le
+A_power_moy_1m,6443,552.7,643.5,3.47,,1448,transitoires LEGITIMES (chauffe) - jamais de seuil statistique sur P,2026-09-05 16:15:05.381252+00
+A_voltage_avg_1m,6382,228.16,6.43,0.688,3.14,1080,stable a excursions anormales - les excursions SONT la donnee,2026-09-05 16:14:41.484514+00
