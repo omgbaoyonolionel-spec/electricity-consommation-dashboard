@@ -1,0 +1,42 @@
+# TESTS D ACCEPTATION PAR FLUX - Phase 3.4 (meta-prompt V3.0) - v1.0.0
+# Seuils adaptes a l architecture reelle (2 chaines independantes).
+
+- flux: FLUX_01_P1_temps_reel
+  criteres:
+    - critere: COUVERTURE_CYCLES
+      seuil: ">= 54 cycles/min sur 95 pct des minutes (hote eveille, lien vivant)"
+      note: le gabarit 54/60 s applique ICI (flux echantillonne), pas a la minute memoire
+    - critere: COINCIDENCE_2_METHODES
+      seuil: "100 pct des cycles success avec 40/40 variables (2 chemins concordants, tolerance rssi 1 dB)"
+    - critere: PAYLOADS_SCELLES
+      seuil: "2 payloads SHA-256 par cycle success"
+    - critere: PLAGE
+      seuil: "100 pct dans les plages physiques versionnees (dq_config)"
+
+- flux: FLUX_02_memoire_minute
+  criteres:
+    - critere: COUVERTURE_MINUTES
+      seuil: ">= 95 pct des minutes du jour PRESENTES ou ABSENTES POUR CAUSE DATEE (les coupures secteur ne comptent pas contre le flux)"
+      note: 1 ligne/min par construction - pas d observations internes a compter
+    - critere: NULL_TX
+      seuil: "0 NULL sur les colonnes cles (constate : la table est dense, l absence = ligne manquante)"
+    - critere: PLAGE
+      seuil: "100 pct dans les plages physiques"
+    - critere: COHERENCE_CHAINE
+      seuil: "p_min <= energie*60 <= p_max (tol 5 pct, charge > 100 W) hors minutes en quarantaine statuees"
+    - critere: RECONCILIATION_INTERNE
+      seuil: "ecart <= 2 pct par jour vs gold.bilan_journalier (recalcul independant)"
+    - critere: RECONCILIATION_COMPTEURS
+      seuil: "ecart <= 2 pct periode vs delta EMData.GetStatus (methode 2 - des que la sonde quotidienne existe)"
+
+- flux: FLUX_03_sondes_documentaires
+  criteres:
+    - critere: CROISSANCE_COMPTEURS
+      seuil: "compteur(t2) >= compteur(t1) a chaque sonde (test activable des la 2e sonde consignee)"
+    - critere: TRACABILITE
+      seuil: "chaque sonde datee et consignee (docs/ ou table dediee)"
+
+- flux: FLUX_99_readings_1s_heritage
+  criteres:
+    - critere: ACCEPTATION
+      seuil: "AUCUNE - flux DEPRECIE_CANDIDAT, exclu de toute analyse (procedure 4.4)"
