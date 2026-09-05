@@ -1,0 +1,44 @@
+nom_normalise,nom_source,source_rpc,unite,plage,description
+A_aprt_inst,a_aprt_power,EM.GetStatus,VA,0..14500,Puissance apparente instantanee voie A
+A_aprt_max_1m,a_max_aprt_power,EMData.GetRecords(minute),VA,0..14500,Apparente max intra-minute A
+A_aprt_min_1m,a_min_aprt_power,EMData.GetRecords(minute),VA,0..14500,Apparente min intra-minute A
+A_current_avg_1m,a_avg_current,EMData.GetRecords(minute),A,0..63,Courant moyen minute
+A_current_inst,a_current,EM.GetStatus,A,0..63,"Courant efficace voie A (calibre TC 63A, confronter au disjoncteur)"
+A_current_max_1m,a_max_current,EMData.GetRecords(minute),A,0..63,Courant max intra-minute (17.9 A observe)
+A_current_min_1m,a_min_current,EMData.GetRecords(minute),A,0..63,Courant min intra-minute
+A_energy_fund_1m,a_fund_act_energy,EMData.GetRecords(minute),Wh/min,0..240,Energie fondamentale (hors harmoniques) de la minute A
+A_energy_fund_ret_1m,a_fund_act_ret_energy,EMData.GetRecords(minute),Wh/min,0..240,Fondamentale retournee A
+A_energy_lag_1m,a_lag_react_energy,EMData.GetRecords(minute),varh/min,0..240,Reactif inductif de la minute A (PF reconstruit = E/rac(E2+Q2))
+A_energy_lead_1m,a_lead_react_energy,EMData.GetRecords(minute),varh/min,0..240,Reactif capacitif de la minute A
+A_energy_total_1m,a_total_act_energy,EMData.GetRecords(minute),Wh/min,0..240,"ENERGIE DE LA MINUTE (PAS un compteur: sommer=OK, x60=P moyenne)"
+A_energy_total_ret_1m,a_total_act_ret_energy,EMData.GetRecords(minute),Wh/min,0..240,Energie retournee de la minute A (~0 sauf inversion/injection)
+A_energy_total_ret_vie,a_total_act_ret_energy,EMData.GetStatus,Wh,0..inf croissant,Cumul a vie energie retournee A (363.64 Wh = inversion du 31/08 confirmee)
+A_energy_total_vie,a_total_act_energy,EMData.GetStatus,Wh,0..inf croissant,"COMPTEUR CUMULATIF A VIE voie A (methode 2, 59690 Wh au 05/09)"
+A_freq_inst,a_freq,EM.GetStatus,Hz,45..55,Frequence reseau (uniquement dans le flux instantane)
+A_pf_inst,a_pf,EM.GetStatus,-,-1..1,Facteur de puissance voie A (distorsion incluse)
+A_power_inst,a_act_power,EM.GetStatus,W,-14500..14500,"Puissance active instantanee voie A (TOTAL menage, 4 quadrants: signe possible)"
+A_power_max_1m,a_max_act_power,EMData.GetRecords(minute),W,-14500..14500,Pointe intra-minute VRAIE (pas echantillonnee) voie A
+A_power_min_1m,a_min_act_power,EMData.GetRecords(minute),W,-14500..14500,Minimum intra-minute A
+A_voltage_avg_1m,a_avg_voltage,EMData.GetRecords(minute),V,0..300,Tension moyenne minute
+A_voltage_inst,a_voltage,EM.GetStatus,V,0..300 plausible / 207..253 conformite,Tension efficace (meme conducteur sur A/B/C en monophase)
+A_voltage_max_1m,a_max_voltage,EMData.GetRecords(minute),V,0..300,Tension max intra-minute
+A_voltage_min_1m,a_min_voltage,EMData.GetRecords(minute),V,0..300,Tension MIN intra-minute (le detecteur de creux: 182.3 V observe)
+B_*_1m,b_*(16 colonnes),EMData.GetRecords(minute),idem A,idem A,Memes 16 grandeurs pour la voie B (INCLUSE dans A)
+B_aprt_inst,b_aprt_power,EM.GetStatus,VA,0..14500,Apparente voie B
+B_current_inst,b_current,EM.GetStatus,A,0..63,Courant voie B
+B_energy_total_ret_vie,b_total_act_ret_energy,EMData.GetStatus,Wh,0..inf croissant,Cumul retour B (0.00: jamais inversee)
+B_energy_total_vie,b_total_act_energy,EMData.GetStatus,Wh,0..inf croissant,Cumul a vie voie B
+B_freq_inst,b_freq,EM.GetStatus,Hz,45..55,Frequence via voie B (identique A)
+B_pf_inst,b_pf,EM.GetStatus,-,-1..1,PF voie B (signature de charge inductive: 0.59-0.69 observe)
+B_power_inst,b_act_power,EM.GetStatus,W,-14500..14500,Puissance voie B INCLUSE dans A (jamais additionner)
+B_voltage_inst,b_voltage,EM.GetStatus,V,0..300,Tension voie B = meme conducteur que A (redondance probatoire)
+C_*_1m,c_*(16 colonnes),EMData.GetRecords(minute),idem A,idem A,Memes 16 grandeurs pour la voie C (temoin de bruit)
+C_aprt_inst,c_aprt_power,EM.GetStatus,VA,0..14500,Apparente residuelle C ~3.4 VA = plancher de bruit capteur
+C_current_inst,c_current,EM.GetStatus,A,0..63,Courant residuel C ~0.015 A = plancher de sensibilite
+C_energy_total_ret_vie,c_total_act_ret_energy,EMData.GetStatus,Wh,0..inf croissant,Cumul retour C: 67.08 Wh = idem (pince brievement posee inversee)
+C_energy_total_vie,c_total_act_energy,EMData.GetStatus,Wh,0..inf croissant,Cumul C: 44.25 Wh = trace des manipulations d installation
+C_freq_inst,c_freq,EM.GetStatus,Hz,45..55,Frequence via voie C
+C_pf_inst,c_pf,EM.GetStatus,-,-1..1,PF indefini sans courant (0.00)
+C_power_inst,c_act_power,EM.GetStatus,W,-14500..14500,Voie C sans charge: zero attendu
+C_voltage_inst,c_voltage,EM.GetStatus,V,0..300,Tension voie C = meme conducteur que A
+SYS_temp_inst,tC,Temperature.GetStatus,degC,-40..85,"Temperature interne (54.8 observe: A SURVEILLER, hors de tous les flux actuels)"

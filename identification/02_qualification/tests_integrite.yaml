@@ -1,0 +1,2 @@
+# TESTS D INTEGRITE - definis Phase 2.1, executes 05/09 (voir 05_qualification_tests_v1.csv du depot)
+tests: {TYPE: PASS 48/48, NULL: PASS 0/32215, PLAGE: PASS 0/19329, STABILITE: PASS 0/6382, COHERENCE: PASS_AVEC_EXCLUES 12=quarantaine, CROISSANCE: NON_TESTABLE (sonde quotidienne requise)}

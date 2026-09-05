@@ -1,0 +1,8 @@
+cle,valeur,unite,commentaire
+plage_courant,0..63,A,calibre TC 3x63A
+plage_frequence,45..55,Hz,nominal 50
+plage_puissance,-14500..14500,W,4 quadrants : signe legitime (preuve 31/08)
+plage_tension_plausible,100..300,V,hors plage = defaut capteur ; distinct de la conformite 207..253
+seuil_creux_tension,207,V,"230 V -10 pct ; tolerance type, reference contractuelle a confirmer"
+seuil_faible_charge_exploratoire,400,W,seuil EXPLORATOIRE v1 pour qualifier faible charge locale ; alternative : P25 de la periode qualifiee
+seuil_faible_charge_p25,219,W,"P25 de la puissance moyenne-minute sur la periode qualifiee 31/08-05/09 (definition alternative de faible charge locale, calcule le 05/09)"

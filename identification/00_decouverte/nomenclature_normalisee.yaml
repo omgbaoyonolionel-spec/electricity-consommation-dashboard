@@ -1,0 +1,8 @@
+# NOMENCLATURE NORMALISEE - v1.0.0 (amendee sur pieces)
+grammaire: CANAL_GRANDEUR_STATUT_AGREGATION
+canaux: [A, B, C, N (mort en monophase), SYS, TS, REGLE]
+grandeurs: [power, voltage, current, pf, freq, energy, aprt, temp, rssi, uptime, ip, mac]
+statuts: [max, min, avg, total, fund, lag, lead, ret - composables (fund_ret), ordre fixe]
+agregations: [inst, 1s, 1m, vie (amendement : compteurs cumulatifs)]
+metadonnees_obligatoires_hors_nom: [classe, licence_usage]
+regle: la nomenclature est figee - toute modification est un evenement (commit + tag)

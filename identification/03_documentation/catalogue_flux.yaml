@@ -1,0 +1,41 @@
+# CATALOGUE DES FLUX DE DONNEES - Phase 3.3 (meta-prompt V3.0) - v1.0.0
+# Volumes mesures sur le pilote 31/08-05/09/2026. Genere le 05/09.
+
+- flux: FLUX_01_P1_temps_reel
+  source: SHELLY_PRO_3EM (RPC Shelly.GetStatus + Shelly.GetComponents, 2 methodes croisees)
+  cadence: 1 cycle/s vise (~57 cycles/min observes)
+  variables: 40 (20 grandeurs x 2 methodes) + offset horloge + statut qualite
+  destination: shelly.p1_instantaneous_observation + p1_collection_cycle + p1_raw_payload (SHA-256)
+  volume_observe: ~1.7 Go/jour (hote eveille)
+  retention_prevue: payloads 2 j, observations 7 j (silver.dq_config - purge NON ENCORE ACTIVE)
+  statut: ACTIF
+  garanties: double methode avec coincidence exigee, payload brut scelle, cycle trace meme en echec
+  limites: dependant de l hote et du lien radio (pertes 1s definitives pendant indisponibilite)
+
+- flux: FLUX_02_memoire_minute
+  source: SHELLY_PRO_3EM (RPC EMData/EM1Data.GetRecords - memoire integree 60 jours)
+  cadence: synchronisation ~60 s + rattrapage automatique post-coupure
+  variables: 22 lignes referentiel (51 colonnes physiques dont 16 par voie)
+  destination: public.shelly_minute
+  volume_observe: ~350 octets/min soit ~0.5 Mo/jour
+  retention: illimitee (verite energetique du pilote)
+  statut: ACTIF - SOURCE DE REFERENCE
+  garanties: integration native appareil, INDEPENDANTE du flux temps reel, survit aux pannes hote/lien
+  limites: granularite minute, pas de freq ni rssi, exactitude metrologique non certifiee (R1)
+
+- flux: FLUX_03_sondes_documentaires
+  source: SHELLY_PRO_3EM (EM.GetConfig, EMData.GetStatus, Sys.GetStatus, Temperature.GetStatus, Wifi.GetStatus)
+  cadence: ponctuelle, documentee a chaque execution
+  variables: 16 (compteurs a vie, uptime, temperature, config, ip)
+  destination: docs/ + rapports (pas de table - candidate: sonde quotidienne pour test CROISSANCE)
+  volume_observe: negligeable
+  statut: ACTIF PONCTUEL
+  evolution_recommandee: sonde EMData.GetStatus quotidienne consignee (methode 2 de reconciliation + test CROISSANCE)
+
+- flux: FLUX_99_readings_1s_heritage
+  source: SHELLY_PRO_3EM (EM.GetStatus, collecteur historique shelly_collector)
+  destination: public.shelly_readings
+  volume_observe: ~357000 lignes au 05/09
+  statut: DEPRECIE_CANDIDAT
+  motifs: pollution documentee (856 reculs de compteur par flux fantome 10.24.38.200), redondant avec FLUX_01, source de l erreur 5.7 GWh
+  procedure: 4.4 du meta-prompt - transition >= 30 j, verification des dependances (dashboards), arret shelly_collector, documentation

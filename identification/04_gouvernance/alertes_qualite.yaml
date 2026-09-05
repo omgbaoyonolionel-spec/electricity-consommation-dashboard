@@ -1,0 +1,134 @@
+# ALERTES DE QUALITE - Phase 4.2 (meta-prompt V3.0) - v1.0.0
+# Seuils calibres sur les 7 episodes de pannes vecues (31/08-05/09), pas sur un manuel.
+# Regle d or (issue de la 2.4) : un seuil statistique sur U a un sens (variable stable
+# a excursions anormales) ; sur P il n en a aucun (transitoires legitimes de chauffe).
+
+alertes:
+  - id: ALERTE_P1_CAPTEUR_OFFLINE
+    condition: aucun cycle P1 success depuis > 120 s ET derniere minute memoire figee > 5 min
+    severite: P1_critique
+    calibration_terrain: >-
+      le gabarit disait 60 s - trop nerveux pour un lien hotspot (micro-coupures
+      radio de 1-2 min frequentes et auto-resolues). 120 s + confirmation croisee
+      des 2 chaines = zero fausse alerte sur l historique rejoue.
+    action: verifier IP (playbook du .env : suffixe .134, curl, -replace, force-recreate), puis hotspot, puis LED appareil
+    diagnostic_associe: Test-NetConnection port 80 (l ICMP est filtre par le hotspot - lecon du 04/09)
+
+  - id: ALERTE_P2_COUVERTURE_BASSE
+    condition: couverture cycles P1 < 80 pct sur 1 h glissante (hote eveille)
+    severite: P2_important
+    calibration_terrain: >-
+      93.6 pct mesure sur une fenetre incluant une panne d IP : le seuil 80 pct
+      separe bien la degradation reelle du bruit de reprise.
+    action: journaliser, examiner rssi et logs collecteurs, consigner l episode
+
+  - id: ALERTE_P2_RETARD_MEMOIRE
+    condition: MAX(ts) de shelly_minute en retard > 10 min sur l heure courante
+    severite: P2_important
+    calibration_terrain: >-
+      absente du gabarit - nee de la panne de 30 h : c est LE signal qui distingue
+      panne de collecte (P1 mort, memoire vivante = rattrapage garanti) et perte
+      reelle (les deux morts = coupure secteur probable).
+    action: si P1 vivant -> attendre le rattrapage ; si P1 mort aussi -> playbook IP puis verification physique
+
+  - id: ALERTE_P3_VALEUR_ANORMALE
+    condition: >-
+      U : excursion hors 207..253 V (episode contigu) OU saut > 40 V entre minutes
+      consecutives. P : AUCUN seuil statistique (transitoires legitimes) - seules
+      les incoherences de chaine (VAL_005) alertent. Compteurs : tout recul (VAL_003).
+    severite: P3_information
+    calibration_terrain: >-
+      46 episodes de creux deja au dossier : l alerte P3 documente, elle ne reveille
+      personne. 3-sigma sur
+$al = @'
+# ALERTES DE QUALITE - Phase 4.2 (meta-prompt V3.0) - v1.0.0
+# Seuils calibres sur les 7 episodes de pannes vecues (31/08-05/09), pas sur un manuel.
+# Regle d or (issue de la 2.4) : un seuil statistique sur U a un sens (variable stable
+# a excursions anormales) ; sur P il n en a aucun (transitoires legitimes de chauffe).
+
+alertes:
+  - id: ALERTE_P1_CAPTEUR_OFFLINE
+    condition: aucun cycle P1 success depuis > 120 s ET derniere minute memoire figee > 5 min
+    severite: P1_critique
+    calibration_terrain: >-
+      le gabarit disait 60 s - trop nerveux pour un lien hotspot (micro-coupures
+      radio de 1-2 min frequentes et auto-resolues). 120 s + confirmation croisee
+      des 2 chaines = zero fausse alerte sur l historique rejoue.
+    action: verifier IP (playbook du .env : suffixe .134, curl, -replace, force-recreate), puis hotspot, puis LED appareil
+    diagnostic_associe: Test-NetConnection port 80 (l ICMP est filtre par le hotspot - lecon du 04/09)
+
+  - id: ALERTE_P2_COUVERTURE_BASSE
+    condition: couverture cycles P1 < 80 pct sur 1 h glissante (hote eveille)
+    severite: P2_important
+    calibration_terrain: >-
+      93.6 pct mesure sur une fenetre incluant une panne d IP : le seuil 80 pct
+      separe bien la degradation reelle du bruit de reprise.
+    action: journaliser, examiner rssi et logs collecteurs, consigner l episode
+
+  - id: ALERTE_P2_RETARD_MEMOIRE
+    condition: MAX(ts) de shelly_minute en retard > 10 min sur l heure courante
+    severite: P2_important
+    calibration_terrain: >-
+      absente du gabarit - nee de la panne de 30 h : c est LE signal qui distingue
+      panne de collecte (P1 mort, memoire vivante = rattrapage garanti) et perte
+      reelle (les deux morts = coupure secteur probable).
+    action: si P1 vivant -> attendre le rattrapage ; si P1 mort aussi -> playbook IP puis verification physique
+
+  - id: ALERTE_P3_VALEUR_ANORMALE
+    condition: >-
+      U : excursion hors 207..253 V (episode contigu) OU saut > 40 V entre minutes
+      consecutives. P : AUCUN seuil statistique (transitoires legitimes) - seules
+      les incoherences de chaine (VAL_005) alertent. Compteurs : tout recul (VAL_003).
+    severite: P3_information
+    calibration_terrain: >-
+      46 episodes de creux deja au dossier : l alerte P3 documente, elle ne reveille
+      personne. 3-sigma sur $al = @'
+# ALERTES DE QUALITE - Phase 4.2 (meta-prompt V3.0) - v1.0.0
+# Seuils calibres sur les 7 episodes de pannes vecues (31/08-05/09), pas sur un manuel.
+# Regle d or (issue de la 2.4) : un seuil statistique sur U a un sens (variable stable
+# a excursions anormales) ; sur P il n en a aucun (transitoires legitimes de chauffe).
+
+alertes:
+  - id: ALERTE_P1_CAPTEUR_OFFLINE
+    condition: aucun cycle P1 success depuis > 120 s ET derniere minute memoire figee > 5 min
+    severite: P1_critique
+    calibration_terrain: >-
+      le gabarit disait 60 s - trop nerveux pour un lien hotspot (micro-coupures
+      radio de 1-2 min frequentes et auto-resolues). 120 s + confirmation croisee
+      des 2 chaines = zero fausse alerte sur l historique rejoue.
+    action: verifier IP (playbook du .env : suffixe .134, curl, -replace, force-recreate), puis hotspot, puis LED appareil
+    diagnostic_associe: Test-NetConnection port 80 (l ICMP est filtre par le hotspot - lecon du 04/09)
+
+  - id: ALERTE_P2_COUVERTURE_BASSE
+    condition: couverture cycles P1 < 80 pct sur 1 h glissante (hote eveille)
+    severite: P2_important
+    calibration_terrain: >-
+      93.6 pct mesure sur une fenetre incluant une panne d IP : le seuil 80 pct
+      separe bien la degradation reelle du bruit de reprise.
+    action: journaliser, examiner rssi et logs collecteurs, consigner l episode
+
+  - id: ALERTE_P2_RETARD_MEMOIRE
+    condition: MAX(ts) de shelly_minute en retard > 10 min sur l heure courante
+    severite: P2_important
+    calibration_terrain: >-
+      absente du gabarit - nee de la panne de 30 h : c est LE signal qui distingue
+      panne de collecte (P1 mort, memoire vivante = rattrapage garanti) et perte
+      reelle (les deux morts = coupure secteur probable).
+    action: si P1 vivant -> attendre le rattrapage ; si P1 mort aussi -> playbook IP puis verification physique
+
+  - id: ALERTE_P3_VALEUR_ANORMALE
+    condition: >-
+      U : excursion hors 207..253 V (episode contigu) OU saut > 40 V entre minutes
+      consecutives. P : AUCUN seuil statistique (transitoires legitimes) - seules
+      les incoherences de chaine (VAL_005) alertent. Compteurs : tout recul (VAL_003).
+    severite: P3_information
+    calibration_terrain: >-
+      46 episodes de creux deja au dossier : l alerte P3 documente, elle ne reveille
+      personne. 3-sigma sur P aurait crie a chaque cycle de chauffe (2 fois/jour).
+    action: marquer, verser au dossier qualite de fourniture, analyser en differe
+
+  - id: ALERTE_P3_TEMPERATURE
+    condition: tC > 60 C (sonde Temperature.GetStatus)
+    severite: P3_information (P2 si > 70 C)
+    calibration_terrain: 54.8 C mesure au premier releve - seuil pose a +5 C de l observe, a affiner avec l historique
+    action: consigner ; si recurrent, ventilation du tableau a examiner

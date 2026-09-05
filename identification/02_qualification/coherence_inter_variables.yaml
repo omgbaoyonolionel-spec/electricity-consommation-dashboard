@@ -1,0 +1,6 @@
+# COHERENCE INTER-VARIABLES - Phase 2.3
+relations_testees:
+  - "p_min*0.95 <= energie_minute*60 <= p_max*1.05 (charge > 100 W) : 6362 minutes, 12 echecs = quarantaine"
+relations_documentees_non_testees_en_minute:
+  - "P = U x I x pf : testable sur flux P1 (grandeurs synchrones) - extension v1.1"
+  - "delta compteur_vie = somme energies_minute : active des la sonde quotidienne"
