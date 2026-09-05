@@ -1,0 +1,64 @@
+# REGLES DE VALIDATION - Phase 4.1 (meta-prompt V3.0) - v1.0.0
+# Doctrine locale : l original ne se rejette JAMAIS. Il se conserve en Bronze,
+# se drapeaute, s inscrit en quarantaine et attend une decision humaine signee.
+# Chaque regle ci-dessous mappe le gabarit VAL_00x sur la regle deja en production.
+
+regles_validation:
+  - id: VAL_001
+    nom: VALEUR_ABSENTE
+    regle_gabarit: NULL ou NaN
+    implementation_locale: >-
+      Test NULL de la Phase 2 (0 NULL constate sur 32215 controles - la table
+      minute est dense par construction). Les ABSENCES DE LIGNES (minutes
+      manquantes) ne sont pas des NULL : elles relevent de la couverture
+      (gold.bilan_journalier) et de la carte des trous, chaque absence devant
+      recevoir une cause datee (doctrine du point de periode).
+    action_locale: comptabiliser en couverture, dater la cause, ne rien inventer (jamais de zero de remplacement)
+    statut: EN PRODUCTION (test Phase 2 + Gold)
+
+  - id: VAL_002
+    nom: HORS_PLAGE
+    regle_gabarit: valeur < min_physique OU > max_physique
+    implementation_locale: >-
+      Plages versionnees dans silver.dq_config (plage_tension_plausible 100..300,
+      plage_courant 0..63, plage_puissance -14500..14500, plage_frequence 45..55).
+      Distinction capitale : plage PLAUSIBLE (hors = defaut capteur, a quarantainer)
+      vs plage de CONFORMITE (207..253 V : hors = donnee PRECIEUSE de qualite de
+      fourniture, a analyser, jamais a ecarter). Test PLAGE Phase 2 : 0/19329.
+    action_locale: conserver + drapeauter + quarantainer (plausible) / analyser (conformite)
+    statut: EN PRODUCTION (dq_config + test Phase 2)
+
+  - id: VAL_003
+    nom: RESET_COMPTEUR
+    regle_gabarit: energy(t) < energy(t-1) hors tolerance numerique
+    implementation_locale: >-
+      S applique aux seuls CUMULATIFS (compteurs a vie EMData) - jamais a
+      l energie-minute, qui decroit legitimement (confusion historique aux
+      5.7 GWh, documentee). Antecedent reel : 856 reculs detectes sur le flux
+      heritage shelly_readings (flux fantome) - detection qui a motive la
+      depreciation du flux. Test CROISSANCE : NON_TESTABLE tant que la sonde
+      quotidienne EMData.GetStatus n est pas en place (recommandation P1).
+    action_locale: conserver + quarantainer + alerter ; si reset avere : documenter la rupture, jamais de correction silencieuse
+    statut: PARTIEL (active des la sonde quotidienne)
+
+  - id: VAL_004
+    nom: DOUBLON
+    regle_gabarit: meme timestamp + meme canal + meme valeur
+    implementation_locale: >-
+      Minute : PK sur ts - doublon impossible par construction (verifie A1 :
+      surplus 0 sur 6 jours). P1 : contrainte (device_id, scheduled_at) - son
+      viol au rattrapage est le bug UniqueViolation connu (issue n 1, 3
+      occurrences) : la contrainte fait son travail, c est le collecteur qui
+      doit apprendre ON CONFLICT DO NOTHING.
+    action_locale: dedupliquer a l insertion (ON CONFLICT), journaliser
+    statut: EN PRODUCTION (contraintes) / correctif collecteur PENDING
+
+  - id: VAL_005_LOCALE
+    nom: COHERENCE_INTERNE_MINUTE
+    regle_gabarit: (absente du gabarit - regle nee du terrain)
+    implementation_locale: >-
+      p_min*0.95 <= energie*60 <= p_max*1.05 quand p_max > 100 W (MIN-002/002b)
+      + polarite (ELE-006 : p_max < -50 W) + lacunes datees (TIM-006).
+      33 entrees en quarantaine, 33 statuees et signees.
+    action_locale: conserver + drapeauter + quarantainer + decision humaine signee
+    statut: EN PRODUCTION (le circuit complet a servi 33 fois)
