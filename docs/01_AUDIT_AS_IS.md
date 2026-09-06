@@ -13,7 +13,7 @@ sur fenetre a pannes (P99 104344 s) ; MTTR panne IP : 24 h avant docteur, <=5 mi
 ## SPOF et actions manuelles cachees
 1 PC portable (hote unique), 1 hotspot (8 sous-reseaux/7 j), 1 humain (Lio) ;
 reconciliation, tests qualite et alertes NON branches (sentinelle absente) ;
-auth_en=false (P0) ; credentials en clair dans .env versionne ( !) ; aucune CI ;
+auth_en=false (P0) ; credentials en clair dans .env LOCAL (verifie non suivi, absent de l historique, exclu par .gitignore:151 - migration Docker secrets en G8) ; aucune CI ;
 aucune sauvegarde restauree ; pas d outil de migration ; git jamais pousse.
 ## Score initial (grille 100 pts, sans arrondi haut)
 Dictionnaire 4/10 ; Reconciliation 4/15 ; Episodes-alertes 2/10 ; SLI-SLO 2/10 ;
