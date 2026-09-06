@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "fenetre_auditee": {"debut": "2026-08-31", "fin": "2026-09-06", "appareil": "a4f00fccaf68", "commit": "e4ac6c0", "schema_colonnes": 442},
+  "domaines": [
+    {"nom": "Dictionnaire et contrats 100 pct", "poids": 10, "points": 4, "preuve": "docs/dictionnaire_donnees.yaml"},
+    {"nom": "Reconciliation permanente P1-memoire", "poids": 15, "points": 4, "preuve": "docs/rapport_identification.md"},
+    {"nom": "Episodes et alertes", "poids": 10, "points": 2, "preuve": "docs/alertes_qualite.yaml"},
+    {"nom": "Supervision SLI-SLO-SLA", "poids": 10, "points": 2, "preuve": "docs/tests_acceptation.yaml"},
+    {"nom": "Tampon 1s et resilience", "poids": 15, "points": 3, "preuve": "docs/01_AUDIT_AS_IS.md"},
+    {"nom": "Tests et CI-CD", "poids": 12, "points": 2, "preuve": "docs/05_qualification_tests_v1.csv"},
+    {"nom": "Sauvegardes et restauration", "poids": 10, "points": 7, "preuve": "docs/PV_RESTAURATION_20260906.md"},
+    {"nom": "Secrets et migrations", "poids": 8, "points": 1, "preuve": "docs/01_AUDIT_AS_IS.md"},
+    {"nom": "Multi-menages", "poids": 10, "points": 0, "preuve": null}
+  ],
+  "court_circuit_fatal": [
+    {"id": "perte_inexpliquee", "declenche": false, "justification": "10 absences canoniques toutes datees sur la fenetre auditee"},
+    {"id": "melange_inter_menages", "declenche": false, "justification": "mono-menage"},
+    {"id": "test_bloquant_echoue", "declenche": false, "justification": "8/8 remediation + 6 tests qualite PASS"}
+  ],
+  "plafonds": [
+    {"id": "dictionnaire_incomplet", "plafond": 8.9, "preuve_levee": null, "hash_attendu": null},
+    {"id": "reconciliation_manuelle", "plafond": 8.0, "preuve_levee": null, "hash_attendu": null},
+    {"id": "tampon_1s_absent", "plafond": 8.0, "preuve_levee": null, "hash_attendu": null},
+    {"id": "ci_absente", "plafond": 8.5, "preuve_levee": null, "hash_attendu": null},
+    {"id": "restauration_absente", "plafond": 8.5, "preuve_levee": "docs/PV_RESTAURATION_20260906.md", "hash_attendu": "9452B24A67BCD14693B8B4BAA572AE51540C270B298B82871299016A5D9B44A6"},
+    {"id": "secrets_migrations", "plafond": 8.0, "preuve_levee": null, "hash_attendu": null},
+    {"id": "mono_menage", "plafond": 8.8, "preuve_levee": null, "hash_attendu": null}
+  ]
+}
