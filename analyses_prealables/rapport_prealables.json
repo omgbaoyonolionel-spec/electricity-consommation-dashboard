@@ -1,0 +1,168 @@
+{
+  "genere_le": "2026-08-24T17:30:05.303133+00:00",
+  "parametres": {
+    "debut_serie": "2026-08-24T14:05:00+00:00",
+    "pas_grille": "10s",
+    "alpha": 0.05
+  },
+  "etapes": {
+    "E1": {
+      "n_lignes": 6794,
+      "prises": [
+        "prise 1",
+        "prise 2",
+        "prise 3"
+      ],
+      "debut": "2026-08-24 14:05:04.523603+00:00",
+      "fin": "2026-08-24 17:36:50.794436+00:00"
+    },
+    "E2": {
+      "prise 1": {
+        "n_bins": 1272,
+        "pct_bins_vides": 1.65
+      },
+      "prise 2": {
+        "n_bins": 1272,
+        "pct_bins_vides": 1.81
+      },
+      "prise 3": {
+        "n_bins": 1272,
+        "pct_bins_vides": 1.73
+      }
+    },
+    "E3": {
+      "prise 1": {
+        "n": 1251,
+        "moyenne": 116.54,
+        "ecart_type": 22.71,
+        "cv_pct": 19.49,
+        "min": 23.91,
+        "p01": 53.78,
+        "p05": 59.26,
+        "q1": 112.73,
+        "mediane": 126.88,
+        "q3": 129.79,
+        "p95": 133.35,
+        "p99": 135.35,
+        "max": 137.15,
+        "iqr": 17.06,
+        "asymetrie_skew": -1.77,
+        "aplatissement_kurtosis": 2.05
+      },
+      "prise 2": {
+        "n": 1249,
+        "moyenne": 94.35,
+        "ecart_type": 3.15,
+        "cv_pct": 3.34,
+        "min": 85.76,
+        "p01": 86.86,
+        "p05": 87.94,
+        "q1": 93.23,
+        "mediane": 94.57,
+        "q3": 96.58,
+        "p95": 98.81,
+        "p99": 99.65,
+        "max": 100.68,
+        "iqr": 3.35,
+        "asymetrie_skew": -0.7,
+        "aplatissement_kurtosis": 0.0
+      },
+      "prise 3": {
+        "n": 1250,
+        "moyenne": 18.22,
+        "ecart_type": 14.33,
+        "cv_pct": 78.67,
+        "min": 5.33,
+        "p01": 5.45,
+        "p05": 5.5,
+        "q1": 5.58,
+        "mediane": 5.86,
+        "q3": 29.83,
+        "p95": 44.22,
+        "p99": 55.62,
+        "max": 78.91,
+        "iqr": 24.25,
+        "asymetrie_skew": 0.68,
+        "aplatissement_kurtosis": -0.53
+      }
+    },
+    "E4": {
+      "prise 1": {
+        "shapiro_p": 1.6598852713760326e-42,
+        "dagostino_p": 3.253058958173514e-85,
+        "ks_p": 6.449357688493739e-96,
+        "normalite_retenue": false
+      },
+      "prise 2": {
+        "shapiro_p": 2.739330296776315e-22,
+        "dagostino_p": 3.127451343312183e-19,
+        "ks_p": 1.1456803828536474e-14,
+        "normalite_retenue": false
+      },
+      "prise 3": {
+        "shapiro_p": 5.657080267835798e-36,
+        "dagostino_p": 2.208267576299215e-24,
+        "ks_p": 9.929548793905723e-105,
+        "normalite_retenue": false
+      }
+    },
+    "E5": {
+      "prise 1": {
+        "adf_p": 0.013203380949669734,
+        "kpss_p": 0.01,
+        "conclusion": "indéterminé (tests discordants)"
+      },
+      "prise 2": {
+        "adf_p": 0.002487060236664246,
+        "kpss_p": 0.09001262153142349,
+        "conclusion": "stationnaire"
+      },
+      "prise 3": {
+        "adf_p": 0.468932530097894,
+        "kpss_p": 0.01,
+        "conclusion": "NON stationnaire"
+      }
+    },
+    "E6": {
+      "prise 1": {
+        "ljungbox_lag20_p": 0.0,
+        "dependance_serielle": true
+      },
+      "prise 2": {
+        "ljungbox_lag20_p": 0.0,
+        "dependance_serielle": true
+      },
+      "prise 3": {
+        "ljungbox_lag20_p": 0.0,
+        "dependance_serielle": true
+      }
+    },
+    "E7": {
+      "spearman": {
+        "prise 1": {
+          "prise 1": 1.0,
+          "prise 2": 0.273,
+          "prise 3": -0.146
+        },
+        "prise 2": {
+          "prise 1": 0.273,
+          "prise 2": 1.0,
+          "prise 3": -0.114
+        },
+        "prise 3": {
+          "prise 1": -0.146,
+          "prise 2": -0.114,
+          "prise 3": 1.0
+        }
+      },
+      "levene_p": 1.6245449967978354e-93,
+      "kruskal_p": 0.0
+    },
+    "E8_recommandations": [
+      "Normalité rejetée sur au moins une prise -> privilégier les tests NON paramétriques (Mann-Whitney, Kruskal-Wallis, Spearman) ou travailler sur agrégats/transformations.",
+      "Dépendance sérielle marquée -> les tests supposant l'iid doivent s'appliquer sur données agrégées (1min ou plus), ou par blocs espacés ; sinon p-values invalides.",
+      "Non-stationnarité détectée -> différencier ou segmenter par régime avant tests de moyenne/variance sur la série fine.",
+      "Variances hétérogènes entre prises -> proscrire l'ANOVA classique ; utiliser Welch ou non paramétrique."
+    ]
+  }
+}

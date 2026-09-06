@@ -1,35 +1,84 @@
-version: "3.8"
+name: electricity-consommation-dashboard
+
+x-collector-common: &collector-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file:
+    - .env
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: unless-stopped
+  networks:
+    - default
 
 services:
+
   postgres:
     image: postgres:16-alpine
     container_name: tapo_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: tapo
-      POSTGRES_PASSWORD: tapo_password   # à changer
-      POSTGRES_DB: tapo
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       - tapo_pgdata:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tapo"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+    networks:
+      - default
 
   collector:
-    build: .
+    <<: *collector-common
     container_name: tapo_collector
+    command:
+      - python
+      - main.py
+      - --loop
+      - "5"
+
+  shelly_collector:
+    <<: *collector-common
+    container_name: shelly_collector
+    command:
+      - python
+      - shelly_collector.py
+
+  shelly_history:
+    <<: *collector-common
+    container_name: shelly_history
+    command:
+      - python
+      - shelly_history_collector.py
+
+  shelly_p1:
+    <<: *collector-common
+    container_name: shelly_p1
+    command:
+      - python
+      - shelly_p1_collector.py
+    environment:
+      DATABASE_URL: postgresql://tapo:tapo_password@postgres:5432/tapo
+      SHELLY_IP: ${SHELLY_IP:-10.165.248.134}
+      SHELLY_DEVICE_ID: ${SHELLY_DEVICE_ID:-shellypro3em63-a4f00fccaf68}
+      SHELLY_FIRMWARE: ${SHELLY_FIRMWARE:-1.4.0}
+      SHELLY_CATALOG_ROOT: /data/shelly_inventory
+    volumes:
+      - "C:/Users/omgba.oyono.lionel/Desktop/SHELLY/shelly_inventory:/data/shelly_inventory:ro"
     restart: unless-stopped
-    env_file: .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-    # Intervalle de collecte en secondes (300 = 5 minutes), modifiable :
-    command: ["python", "main.py", "--loop", "300"]
+
+networks:
+  default:
+    name: electricity-consommation-dashboard_default
 
 volumes:
   tapo_pgdata:
+    name: electricity-consommation-dashboard_tapo_pgdata
