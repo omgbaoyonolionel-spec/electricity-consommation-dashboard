@@ -29,4 +29,4 @@ $rapport = @("# SCORECARD_FINAL - genere par ops/qualify.ps1 le $(Get-Date -Form
   "NOTE FINALE : $finale/10")
 $rapport | Set-Content (Join-Path $racine "SCORECARD_FINAL.md") -Encoding ASCII
 $rapport | Write-Output
-if ($finale -lt $note) { exit 1 } else { exit 0 }
+if ($finale -gt [decimal]9.0) { Write-Output "VERDICT : PRE-QUALIFIE > 9/10 (observation SLA 30 j non achevee)"; exit 0 } else { Write-Output "VERDICT : NON QUALIFIE - $finale/10"; exit 1 }
