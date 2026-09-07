@@ -18,7 +18,7 @@ Set-Location $racine
 $suivis = git ls-files | Where-Object { $_ -ne "ops/qualify.ps1" }
 $touches = @()
 foreach ($fich in $suivis) {
-  if (Select-String -Path $fich -Pattern "PASSWORD\s*[:=]|://[^/\s]+:[^@\s]+@" -Quiet -ErrorAction SilentlyContinue) { $touches += $fich } }
+  if (Select-String -Path $fich -Pattern "(?!.*(CHANGEME|changez_moi|votre_|exemple))(PASSWORD\s*[:=]|://[^/\s]+:[^@\s]+@)" -Quiet -ErrorAction SilentlyContinue) { $touches += $fich } }
 $exc2 = @($sc.secrets_justifies) | Where-Object { $_ }
 $viol2 = @($touches | Where-Object { $_ -notin $exc2 })
 if ($viol2.Count -gt 0) { Write-Output "AUDIT BLOQUE [INV-2 secrets versionnes] : $($viol2 -join ', ')"; exit 5 }

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Contient la configuration technique du projet. 
 """
 
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
  
     tapo_email: str
     tapo_password: str
-    pg_dsn: str = "postgresql://tapo:tapo_password@postgres:5432/tapo"
+    pg_dsn: str = "postgresql://tapo:CHANGEME_VOIR_ENV@postgres:5432/tapo"
  
     tapo_devices_raw: str = Field(default="", alias="TAPO_DEVICES")
  
@@ -36,6 +36,6 @@ class Settings(BaseSettings):
     def _check_devices_not_empty(self) -> "Settings":
         if not self.devices:
             raise ValueError(
-                "Aucune prise configurée (variable TAPO_DEVICES vide) — voir .env.example"
+                "Aucune prise configurÃ©e (variable TAPO_DEVICES vide) â€” voir .env.example"
             )
         return self

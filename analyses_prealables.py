@@ -1,33 +1,33 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 =============================================================================
-ANALYSES STATISTIQUES PRÉALABLES — Consommation électrique (Tapo P115)
+ANALYSES STATISTIQUES PRÃ‰ALABLES â€” Consommation Ã©lectrique (Tapo P115)
 =============================================================================
-Objectif : caractériser rigoureusement les séries AVANT toute batterie de
+Objectif : caractÃ©riser rigoureusement les sÃ©ries AVANT toute batterie de
 tests statistiques, afin de choisir les tests valides (parametrique vs non
-parametrique, iid vs série dépendante) et de documenter les hypothèses.
+parametrique, iid vs sÃ©rie dÃ©pendante) et de documenter les hypothÃ¨ses.
 
-8 étapes :
+8 Ã©tapes :
   E1  Chargement + troncature de la phase de mise en route
-  E2  Rééchantillonnage sur grille régulière (gestion du jitter ~5,4 s)
-  E3  Statistiques descriptives complètes par prise
-  E4  Analyse des distributions (histogrammes, normalité, QQ-plots)
-  E5  Stationnarité (ADF + KPSS, lecture croisée)
-  E6  Structure de dépendance (ACF, PACF, Ljung-Box)
-  E7  Comparaisons inter-prises (corrélations, homogénéité des variances)
-  E8  Synthèse : recommandations de tests + exports (JSON, PNG, XLSX)
+  E2  RÃ©Ã©chantillonnage sur grille rÃ©guliÃ¨re (gestion du jitter ~5,4 s)
+  E3  Statistiques descriptives complÃ¨tes par prise
+  E4  Analyse des distributions (histogrammes, normalitÃ©, QQ-plots)
+  E5  StationnaritÃ© (ADF + KPSS, lecture croisÃ©e)
+  E6  Structure de dÃ©pendance (ACF, PACF, Ljung-Box)
+  E7  Comparaisons inter-prises (corrÃ©lations, homogÃ©nÃ©itÃ© des variances)
+  E8  SynthÃ¨se : recommandations de tests + exports (JSON, PNG, XLSX)
 
 Sorties (dossier ./analyses_prealables/) :
-  - 01_descriptives.xlsx        statistiques par prise et par pas d'agrégation
+  - 01_descriptives.xlsx        statistiques par prise et par pas d'agrÃ©gation
   - 02_distributions.png        histogrammes + QQ-plots (3 prises)
   - 03_series_temporelles.png   chronogrammes puissances
-  - 04_acf_pacf.png             autocorrélogrammes
-  - 05_correlations.png         matrice de corrélation inter-prises
-  - rapport_prealables.json     tous les résultats machine-lisibles
-  - Console : synthèse et recommandations pour la suite des tests
+  - 04_acf_pacf.png             autocorrÃ©logrammes
+  - 05_correlations.png         matrice de corrÃ©lation inter-prises
+  - rapport_prealables.json     tous les rÃ©sultats machine-lisibles
+  - Console : synthÃ¨se et recommandations pour la suite des tests
 
-Dépendances : pip install pandas scipy statsmodels matplotlib sqlalchemy psycopg2-binary openpyxl
+DÃ©pendances : pip install pandas scipy statsmodels matplotlib sqlalchemy psycopg2-binary openpyxl
 Usage       : python analyses_prealables.py
 =============================================================================
 """
@@ -54,11 +54,11 @@ warnings.filterwarnings("ignore")
 # Configuration
 # ---------------------------------------------------------------------------
 DB_URL = os.getenv("TAPO_DB_URL",
-                   "postgresql://tapo:tapo_password@localhost:5432/tapo")
+                   "postgresql://tapo:CHANGEME_VOIR_ENV@localhost:5432/tapo")
 DEBUT_SERIE_PROPRE = os.getenv("QC_START", "2026-08-24T14:05:00+00:00")
 TZ_LOCALE = "Africa/Douala"
-PAS_GRILLE = "10s"          # grille régulière : absorbe le jitter (pas effectif 5,4 s)
-PAS_AGREGATION = "1min"     # second niveau pour stats agrégées
+PAS_GRILLE = "10s"          # grille rÃ©guliÃ¨re : absorbe le jitter (pas effectif 5,4 s)
+PAS_AGREGATION = "1min"     # second niveau pour stats agrÃ©gÃ©es
 ALPHA = 0.05
 OUTDIR = "analyses_prealables"
 
@@ -76,9 +76,9 @@ def titre(txt):
 
 
 # ===========================================================================
-# E1 — CHARGEMENT + TRONCATURE
+# E1 â€” CHARGEMENT + TRONCATURE
 # ===========================================================================
-titre("E1 — Chargement des données")
+titre("E1 â€” Chargement des donnÃ©es")
 engine = create_engine(DB_URL)
 df = pd.read_sql(
     'SELECT device_name, "timestamp", current_power_mw, today_energy_wh, '
@@ -90,21 +90,21 @@ df["puissance_w"] = df["current_power_mw"] / 1000.0
 prises = sorted(df["device_name"].unique())
 
 print(f"Lignes : {len(df)} | Prises : {prises}")
-print(f"Fenêtre : {df['timestamp'].min()} -> {df['timestamp'].max()} "
+print(f"FenÃªtre : {df['timestamp'].min()} -> {df['timestamp'].max()} "
       f"({(df['timestamp'].max() - df['timestamp'].min())})")
 rapport["etapes"]["E1"] = {"n_lignes": int(len(df)), "prises": prises,
                            "debut": str(df["timestamp"].min()),
                            "fin": str(df["timestamp"].max())}
 
 # ===========================================================================
-# E2 — RÉÉCHANTILLONNAGE SUR GRILLE RÉGULIÈRE
+# E2 â€” RÃ‰Ã‰CHANTILLONNAGE SUR GRILLE RÃ‰GULIÃˆRE
 # ===========================================================================
 # Justification : le pas effectif est ~5,4 s avec jitter et rares trous de
-# 20-45 s. Une grille régulière à 10 s (moyenne des points du bin) rend les
-# séries comparables entre prises et compatibles avec ACF/tests temporels.
-# Les bins vides (trous) restent NaN : ils sont comptés, PAS interpolés ici —
-# l'imputation éventuelle est une décision d'analyse à documenter.
-titre(f"E2 — Rééchantillonnage sur grille {PAS_GRILLE}")
+# 20-45 s. Une grille rÃ©guliÃ¨re Ã  10 s (moyenne des points du bin) rend les
+# sÃ©ries comparables entre prises et compatibles avec ACF/tests temporels.
+# Les bins vides (trous) restent NaN : ils sont comptÃ©s, PAS interpolÃ©s ici â€”
+# l'imputation Ã©ventuelle est une dÃ©cision d'analyse Ã  documenter.
+titre(f"E2 â€” RÃ©Ã©chantillonnage sur grille {PAS_GRILLE}")
 series = {}
 for p in prises:
     s = (df[df["device_name"] == p]
@@ -116,12 +116,12 @@ for p in prises:
     rapport["etapes"].setdefault("E2", {})[p] = {
         "n_bins": int(len(s)), "pct_bins_vides": round(float(pct_vides), 2)}
 
-grille = pd.DataFrame(series)  # colonnes = prises, index = temps régulier
+grille = pd.DataFrame(series)  # colonnes = prises, index = temps rÃ©gulier
 
 # ===========================================================================
-# E3 — STATISTIQUES DESCRIPTIVES
+# E3 â€” STATISTIQUES DESCRIPTIVES
 # ===========================================================================
-titre("E3 — Statistiques descriptives (puissance, W)")
+titre("E3 â€” Statistiques descriptives (puissance, W)")
 lignes_desc = []
 for p in prises:
     s = grille[p].dropna()
@@ -134,29 +134,29 @@ for p in prises:
         "mediane": q[0.5], "q3": q[0.75], "p95": q[0.95], "p99": q[0.99],
         "max": s.max(), "iqr": q[0.75] - q[0.25],
         "asymetrie_skew": stats.skew(s),
-        "aplatissement_kurtosis": stats.kurtosis(s),  # excès (normale = 0)
+        "aplatissement_kurtosis": stats.kurtosis(s),  # excÃ¨s (normale = 0)
     }
     lignes_desc.append(d)
-    print(f"  {p}: moy={d['moyenne']:.1f} W  σ={d['ecart_type']:.1f}  "
+    print(f"  {p}: moy={d['moyenne']:.1f} W  Ïƒ={d['ecart_type']:.1f}  "
           f"CV={d['cv_pct']:.1f} %  med={d['mediane']:.1f}  "
           f"skew={d['asymetrie_skew']:.2f}  kurt={d['aplatissement_kurtosis']:.2f}")
 desc = pd.DataFrame(lignes_desc).set_index("prise").round(2)
 rapport["etapes"]["E3"] = json.loads(desc.to_json(orient="index"))
 
-# Agrégation minute (utile pour les tests qui exigent moins de dépendance)
+# AgrÃ©gation minute (utile pour les tests qui exigent moins de dÃ©pendance)
 minute = pd.DataFrame({p: grille[p].resample(PAS_AGREGATION).mean()
                        for p in prises})
 
 with pd.ExcelWriter(f"{OUTDIR}/01_descriptives.xlsx", engine="openpyxl") as xl:
     desc.to_excel(xl, sheet_name=f"Grille {PAS_GRILLE}")
-    minute.describe().round(2).T.to_excel(xl, sheet_name=f"Agrégé {PAS_AGREGATION}")
+    minute.describe().round(2).T.to_excel(xl, sheet_name=f"AgrÃ©gÃ© {PAS_AGREGATION}")
 
 # ===========================================================================
-# E4 — DISTRIBUTIONS ET NORMALITÉ
+# E4 â€” DISTRIBUTIONS ET NORMALITÃ‰
 # ===========================================================================
-# Trois tests complémentaires ; échantillonnage à 5000 points max pour
-# Shapiro (limite de validité de l'implémentation).
-titre("E4 — Distributions et tests de normalité")
+# Trois tests complÃ©mentaires ; Ã©chantillonnage Ã  5000 points max pour
+# Shapiro (limite de validitÃ© de l'implÃ©mentation).
+titre("E4 â€” Distributions et tests de normalitÃ©")
 fig, axes = plt.subplots(2, len(prises), figsize=(5 * len(prises), 7))
 norm_res = {}
 for i, p in enumerate(prises):
@@ -172,22 +172,22 @@ for i, p in enumerate(prises):
           f"KS p={ks_p:.2e} -> {'normale' if normal else 'NON normale'}")
 
     axes[0, i].hist(s, bins=60, color="#4472c4", edgecolor="white")
-    axes[0, i].set_title(f"{p} — histogramme")
+    axes[0, i].set_title(f"{p} â€” histogramme")
     axes[0, i].set_xlabel("Puissance (W)")
     stats.probplot(s, dist="norm", plot=axes[1, i])
-    axes[1, i].set_title(f"{p} — QQ-plot")
+    axes[1, i].set_title(f"{p} â€” QQ-plot")
 fig.tight_layout()
 fig.savefig(f"{OUTDIR}/02_distributions.png")
 plt.close(fig)
 rapport["etapes"]["E4"] = norm_res
 
 # ===========================================================================
-# E5 — STATIONNARITÉ (ADF + KPSS, lecture croisée)
+# E5 â€” STATIONNARITÃ‰ (ADF + KPSS, lecture croisÃ©e)
 # ===========================================================================
-# ADF : H0 = racine unitaire (non stationnaire) -> p < α = stationnaire
-# KPSS: H0 = stationnaire                      -> p < α = NON stationnaire
+# ADF : H0 = racine unitaire (non stationnaire) -> p < Î± = stationnaire
+# KPSS: H0 = stationnaire                      -> p < Î± = NON stationnaire
 # La conclusion n'est solide que si les deux tests concordent.
-titre("E5 — Stationnarité (ADF + KPSS)")
+titre("E5 â€” StationnaritÃ© (ADF + KPSS)")
 stat_res = {}
 for p in prises:
     s = grille[p].dropna()
@@ -198,13 +198,13 @@ for p in prises:
     elif adf_p >= ALPHA and kpss_p <= ALPHA:
         concl = "NON stationnaire"
     else:
-        concl = "indéterminé (tests discordants)"
+        concl = "indÃ©terminÃ© (tests discordants)"
     stat_res[p] = {"adf_p": float(adf_p), "kpss_p": float(kpss_p),
                    "conclusion": concl}
     print(f"  {p}: ADF p={adf_p:.3g} | KPSS p={kpss_p:.3g} -> {concl}")
 rapport["etapes"]["E5"] = stat_res
 
-# Chronogrammes (support visuel de la stationnarité)
+# Chronogrammes (support visuel de la stationnaritÃ©)
 fig, axes = plt.subplots(len(prises), 1, figsize=(12, 2.6 * len(prises)),
                          sharex=True)
 for ax, p in zip(np.atleast_1d(axes), prises):
@@ -212,17 +212,17 @@ for ax, p in zip(np.atleast_1d(axes), prises):
     ax.plot(idx_local, grille[p], lw=0.6, color="#4472c4")
     ax.set_ylabel(f"{p}\n(W)")
 axes[-1].set_xlabel(f"Heure locale ({TZ_LOCALE})")
-fig.suptitle("Séries de puissance sur grille régulière")
+fig.suptitle("SÃ©ries de puissance sur grille rÃ©guliÃ¨re")
 fig.tight_layout()
 fig.savefig(f"{OUTDIR}/03_series_temporelles.png")
 plt.close(fig)
 
 # ===========================================================================
-# E6 — STRUCTURE DE DÉPENDANCE (ACF / PACF / Ljung-Box)
+# E6 â€” STRUCTURE DE DÃ‰PENDANCE (ACF / PACF / Ljung-Box)
 # ===========================================================================
-# Une autocorrélation forte invalide l'hypothèse iid de nombreux tests :
-# elle impose d'agréger (minute+) ou d'utiliser des tests robustes.
-titre("E6 — Autocorrélation (Ljung-Box, lag 20)")
+# Une autocorrÃ©lation forte invalide l'hypothÃ¨se iid de nombreux tests :
+# elle impose d'agrÃ©ger (minute+) ou d'utiliser des tests robustes.
+titre("E6 â€” AutocorrÃ©lation (Ljung-Box, lag 20)")
 fig, axes = plt.subplots(len(prises), 2, figsize=(11, 2.8 * len(prises)))
 dep_res = {}
 for i, p in enumerate(prises):
@@ -232,33 +232,33 @@ for i, p in enumerate(prises):
     dep_res[p] = {"ljungbox_lag20_p": lb_p,
                   "dependance_serielle": bool(lb_p < ALPHA)}
     print(f"  {p}: Ljung-Box(20) p={lb_p:.2e} -> "
-          f"{'dépendance sérielle marquée' if lb_p < ALPHA else 'compatible iid'}")
-    plot_acf(s, ax=axes[i, 0], lags=60, title=f"{p} — ACF")
-    plot_pacf(s, ax=axes[i, 1], lags=60, method="ywm", title=f"{p} — PACF")
+          f"{'dÃ©pendance sÃ©rielle marquÃ©e' if lb_p < ALPHA else 'compatible iid'}")
+    plot_acf(s, ax=axes[i, 0], lags=60, title=f"{p} â€” ACF")
+    plot_pacf(s, ax=axes[i, 1], lags=60, method="ywm", title=f"{p} â€” PACF")
 fig.tight_layout()
 fig.savefig(f"{OUTDIR}/04_acf_pacf.png")
 plt.close(fig)
 rapport["etapes"]["E6"] = dep_res
 
 # ===========================================================================
-# E7 — COMPARAISONS INTER-PRISES
+# E7 â€” COMPARAISONS INTER-PRISES
 # ===========================================================================
-titre("E7 — Comparaisons inter-prises")
-# Corrélations (Pearson + Spearman) sur bins simultanés complets
+titre("E7 â€” Comparaisons inter-prises")
+# CorrÃ©lations (Pearson + Spearman) sur bins simultanÃ©s complets
 complet = grille.dropna()
 corr_p = complet.corr(method="pearson").round(3)
 corr_s = complet.corr(method="spearman").round(3)
-print("Corrélation de Spearman (robuste) :\n", corr_s.to_string())
+print("CorrÃ©lation de Spearman (robuste) :\n", corr_s.to_string())
 
-# Homogénéité des variances (Levene, robuste à la non-normalité)
+# HomogÃ©nÃ©itÃ© des variances (Levene, robuste Ã  la non-normalitÃ©)
 lev_stat, lev_p = stats.levene(*[grille[p].dropna() for p in prises],
                                center="median")
-# Comparaison globale des niveaux (Kruskal-Wallis, non paramétrique)
+# Comparaison globale des niveaux (Kruskal-Wallis, non paramÃ©trique)
 kw_stat, kw_p = stats.kruskal(*[grille[p].dropna() for p in prises])
 print(f"Levene (variances)      : p={lev_p:.3g} -> "
-      f"{'hétérogènes' if lev_p < ALPHA else 'homogènes'}")
+      f"{'hÃ©tÃ©rogÃ¨nes' if lev_p < ALPHA else 'homogÃ¨nes'}")
 print(f"Kruskal-Wallis (niveaux): p={kw_p:.3g} -> "
-      f"{'au moins une prise diffère' if kw_p < ALPHA else 'pas de différence détectée'}")
+      f"{'au moins une prise diffÃ¨re' if kw_p < ALPHA else 'pas de diffÃ©rence dÃ©tectÃ©e'}")
 rapport["etapes"]["E7"] = {
     "spearman": json.loads(corr_s.to_json()),
     "levene_p": float(lev_p), "kruskal_p": float(kw_p)}
@@ -270,40 +270,40 @@ ax.set_yticks(range(len(prises)), prises)
 for a in range(len(prises)):
     for b in range(len(prises)):
         ax.text(b, a, corr_s.iloc[a, b], ha="center", va="center")
-fig.colorbar(im, label="ρ de Spearman")
-ax.set_title("Corrélations inter-prises (Spearman)")
+fig.colorbar(im, label="Ï de Spearman")
+ax.set_title("CorrÃ©lations inter-prises (Spearman)")
 fig.tight_layout()
 fig.savefig(f"{OUTDIR}/05_correlations.png")
 plt.close(fig)
 
 # ===========================================================================
-# E8 — SYNTHÈSE ET RECOMMANDATIONS
+# E8 â€” SYNTHÃˆSE ET RECOMMANDATIONS
 # ===========================================================================
-titre("E8 — Synthèse : implications pour les tests à venir")
+titre("E8 â€” SynthÃ¨se : implications pour les tests Ã  venir")
 recos = []
 if not all(r["normalite_retenue"] for r in norm_res.values()):
-    recos.append("Normalité rejetée sur au moins une prise -> privilégier les "
-                 "tests NON paramétriques (Mann-Whitney, Kruskal-Wallis, "
-                 "Spearman) ou travailler sur agrégats/transformations.")
+    recos.append("NormalitÃ© rejetÃ©e sur au moins une prise -> privilÃ©gier les "
+                 "tests NON paramÃ©triques (Mann-Whitney, Kruskal-Wallis, "
+                 "Spearman) ou travailler sur agrÃ©gats/transformations.")
 if any(r["dependance_serielle"] for r in dep_res.values()):
-    recos.append("Dépendance sérielle marquée -> les tests supposant l'iid "
-                 f"doivent s'appliquer sur données agrégées ({PAS_AGREGATION} "
-                 "ou plus), ou par blocs espacés ; sinon p-values invalides.")
+    recos.append("DÃ©pendance sÃ©rielle marquÃ©e -> les tests supposant l'iid "
+                 f"doivent s'appliquer sur donnÃ©es agrÃ©gÃ©es ({PAS_AGREGATION} "
+                 "ou plus), ou par blocs espacÃ©s ; sinon p-values invalides.")
 if any("NON" in r["conclusion"] for r in stat_res.values()):
-    recos.append("Non-stationnarité détectée -> différencier ou segmenter par "
-                 "régime avant tests de moyenne/variance sur la série fine.")
+    recos.append("Non-stationnaritÃ© dÃ©tectÃ©e -> diffÃ©rencier ou segmenter par "
+                 "rÃ©gime avant tests de moyenne/variance sur la sÃ©rie fine.")
 if lev_p < ALPHA:
-    recos.append("Variances hétérogènes entre prises -> proscrire l'ANOVA "
-                 "classique ; utiliser Welch ou non paramétrique.")
+    recos.append("Variances hÃ©tÃ©rogÃ¨nes entre prises -> proscrire l'ANOVA "
+                 "classique ; utiliser Welch ou non paramÃ©trique.")
 if not recos:
-    recos.append("Aucun obstacle majeur détecté : les tests paramétriques "
-                 "standards sont envisageables sur ces séries.")
+    recos.append("Aucun obstacle majeur dÃ©tectÃ© : les tests paramÃ©triques "
+                 "standards sont envisageables sur ces sÃ©ries.")
 for r in recos:
-    print("  • " + r)
+    print("  â€¢ " + r)
 rapport["etapes"]["E8_recommandations"] = recos
 
 with open(f"{OUTDIR}/rapport_prealables.json", "w", encoding="utf-8") as f:
     json.dump(rapport, f, ensure_ascii=False, indent=2, default=str)
 
-print(f"\nExports écrits dans ./{OUTDIR}/ "
+print(f"\nExports Ã©crits dans ./{OUTDIR}/ "
       "(XLSX, 4 PNG, rapport_prealables.json)")

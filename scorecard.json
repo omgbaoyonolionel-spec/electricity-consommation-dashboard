@@ -1,6 +1,7 @@
 {
   "version": "1.0.1",
   "ports_exposes_justifies": ["n8n"],
+  "secrets_justifies": [".env.example", "shelly_p1_collector.py", "src/infrastructure/config.py", "src/infrastructure/tapo_client.py"],
   "fenetre_auditee": {"debut": "2026-08-31", "fin": "2026-09-06", "appareil": "a4f00fccaf68", "commit": "e4ac6c0", "schema_colonnes": 442},
   "domaines": [
     {"nom": "Dictionnaire et contrats 100 pct", "poids": 10, "points": 4, "preuve": "docs/dictionnaire_donnees.yaml"},

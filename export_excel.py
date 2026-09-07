@@ -1,7 +1,7 @@
-import pandas as pd
+﻿import pandas as pd
 from sqlalchemy import create_engine
 
-engine = create_engine("postgresql://tapo:tapo_password@localhost:5432/tapo")
+engine = create_engine("postgresql://tapo:CHANGEME_VOIR_ENV@localhost:5432/tapo")
 df = pd.read_sql("""
     SELECT id, device_name, ip,
            "timestamp" AT TIME ZONE 'Africa/Douala' AS heure_locale,
@@ -15,4 +15,4 @@ with pd.ExcelWriter("historique_tapo.xlsx", engine="openpyxl") as xl:
     for prise, g in df.groupby("device_name"):
         g.to_excel(xl, sheet_name=prise, index=False)
 
-print(f"{len(df)} lignes exportées vers historique_tapo.xlsx")
+print(f"{len(df)} lignes exportÃ©es vers historique_tapo.xlsx")
