@@ -66,7 +66,7 @@ services:
       - python
       - shelly_p1_collector.py
     environment:
-      DATABASE_URL: postgresql://tapo:tapo_password@postgres:5432/tapo
+      DATABASE_URL: ${DATABASE_URL}
       SHELLY_IP: ${SHELLY_IP:-10.165.248.134}
       SHELLY_DEVICE_ID: ${SHELLY_DEVICE_ID:-shellypro3em63-a4f00fccaf68}
       SHELLY_FIRMWARE: ${SHELLY_FIRMWARE:-1.4.0}
