@@ -1,4 +1,4 @@
-# ops/qualify.ps1 - calculateur de qualification. Aucune note saisie a la main. v1.2.0
+# ops/qualify.ps1 - calculateur de qualification. Aucune note saisie a la main. v1.2.2
 $ErrorActionPreference = "Stop"
 $racine = Split-Path $PSScriptRoot -Parent
 $sc = Get-Content (Join-Path $racine "scorecard.json") -Raw | ConvertFrom-Json
@@ -48,7 +48,7 @@ foreach ($p in $sc.plafonds) {
   if (-not $leve) { $actifs += $p } }
 $plancher = if ($actifs.Count -gt 0) { ($actifs | Measure-Object -Property plafond -Minimum).Minimum } else { [decimal]10 }
 $finale = [math]::Min($note, [decimal]$plancher)
-$rapport = @("# SCORECARD_FINAL - qualify v1.2.0 - $(Get-Date -Format u)",
+$rapport = @("# SCORECARD_FINAL - qualify v1.2.2 - $(Get-Date -Format u)",
   "Invariants : ports OK, secrets OK, fraicheur $retard min, push $avance commits",
   "Score brut : $brut/100 -> $note/10",
   "Plafonds ACTIFS : $(($actifs | ForEach-Object { $_.id + '(' + $_.plafond + ')' }) -join ' ')",
