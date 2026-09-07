@@ -28,6 +28,9 @@ if ($retard -gt 15) { Write-Output "AUDIT BLOQUE [INV-3 fraicheur] : retard $ret
 # INV-4 push : pas plus de 20 commits non pousses
 $avance = [int](git rev-list --count "@{u}..HEAD" 2>$null)
 if ($avance -gt 20) { Write-Output "AUDIT BLOQUE [INV-4 push] : $avance commits non pousses (seuil 20)"; exit 7 }
+# INV-5 sentinelle : verdicts frais obligatoires (la fonction, pas l outil)
+$age_v = [decimal](docker exec tapo_postgres psql -U tapo -d tapo -t -A -c "SELECT COALESCE(ROUND(EXTRACT(EPOCH FROM now()-MAX(execute_le))/60,1), 9999) FROM monitoring.verdicts;")
+if ($age_v -gt 120) { Write-Output "AUDIT BLOQUE [INV-5 sentinelle] : dernier verdict il y a $age_v min (seuil 120)"; exit 8 }
 # --- calcul de note (inchange v1.0) ---
 $bloques = @()
 foreach ($d in $sc.domaines) {

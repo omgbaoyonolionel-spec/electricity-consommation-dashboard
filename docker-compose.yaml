@@ -75,6 +75,18 @@ services:
       - "C:/Users/omgba.oyono.lionel/Desktop/SHELLY/shelly_inventory:/data/shelly_inventory:ro"
     restart: unless-stopped
 
+
+  shelly_sentinelle:
+    build: .
+    container_name: shelly_sentinelle
+    env_file: .env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    command: python /app/sentinelle.py
+    volumes:
+      - ./sentinelle.py:/app/sentinelle.py:ro
+      - C:\Users\omgba.oyono.lionel\Desktop\SHELLY\alertes:/alertes
 networks:
   default:
     name: electricity-consommation-dashboard_default
