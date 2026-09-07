@@ -1,11 +1,19 @@
-# ops/qualify.ps1 - calculateur de qualification. Aucune note saisie a la main. v1.0.0
+# ops/qualify.ps1 - calculateur de qualification. Aucune note saisie a la main. v1.1.0
 $ErrorActionPreference = "Stop"
 $racine = Split-Path $PSScriptRoot -Parent
 $sc = Get-Content (Join-Path $racine "scorecard.json") -Raw | ConvertFrom-Json
 $somme = ($sc.domaines | Measure-Object -Property poids -Sum).Sum
 if ($somme -ne 100) { Write-Output "CONFIG INVALIDE : poids = $somme (attendu 100)"; exit 3 }
-foreach ($f in $sc.court_circuit_fatal) {
-  if ($f.declenche) { Write-Output "NON QUALIFIE : $($f.id)"; exit 2 } }
+foreach ($fatal in $sc.court_circuit_fatal) {
+  if ($fatal.declenche) { Write-Output "NON QUALIFIE : $($fatal.id)"; exit 2 } }
+# Invariant S2 : aucun port publie sur 0.0.0.0 (exceptions justifiees dans scorecard.json)
+$exposes = @()
+docker ps --format "{{.Names}} {{.Ports}}" | Select-String "0\.0\.0\.0" | ForEach-Object {
+  $exposes += ($_.Line -split " ")[0] }
+$exceptions = @($sc.ports_exposes_justifies) | Where-Object { $_ }
+$violations = @($exposes | Where-Object { $_ -notin $exceptions })
+if ($violations.Count -gt 0) {
+  Write-Output "AUDIT BLOQUE : ports publies sur 0.0.0.0 sans justification -> $($violations -join ', ')"; exit 4 }
 $bloques = @()
 foreach ($d in $sc.domaines) {
   if ($d.points -gt $d.poids) { Write-Output "CONFIG INVALIDE : $($d.nom) points > poids"; exit 3 }
@@ -22,11 +30,13 @@ foreach ($p in $sc.plafonds) {
   if (-not $leve) { $actifs += $p } }
 $plancher = if ($actifs.Count -gt 0) { ($actifs | Measure-Object -Property plafond -Minimum).Minimum } else { [decimal]10 }
 $finale = [math]::Min($note, [decimal]$plancher)
-$rapport = @("# SCORECARD_FINAL - genere par ops/qualify.ps1 le $(Get-Date -Format u)",
+$rapport = @("# SCORECARD_FINAL - genere par ops/qualify.ps1 v1.1.0 le $(Get-Date -Format u)",
   "Fenetre : $($sc.fenetre_auditee.debut) -> $($sc.fenetre_auditee.fin) - appareil $($sc.fenetre_auditee.appareil) - commit $($sc.fenetre_auditee.commit)",
-  "Score brut : $brut/100 -> $note/10", "Plafonds ACTIFS : $(($actifs | ForEach-Object { $_.id + '(' + $_.plafond + ')' }) -join ' ')",
-  "Plafonds LEVES mecaniquement : $((($sc.plafonds | Where-Object { $_ -notin $actifs }) | ForEach-Object { $_.id }) -join ' ')",
+  "Invariant ports : 0 exposition non justifiee (verifie sur docker ps)",
+  "Score brut : $brut/100 -> $note/10",
+  "Plafonds ACTIFS : $(($actifs | ForEach-Object { $_.id + '(' + $_.plafond + ')' }) -join ' ')",
   "NOTE FINALE : $finale/10")
 $rapport | Set-Content (Join-Path $racine "SCORECARD_FINAL.md") -Encoding ASCII
 $rapport | Write-Output
-if ($finale -gt [decimal]9.0) { Write-Output "VERDICT : PRE-QUALIFIE > 9/10 (observation SLA 30 j non achevee)"; exit 0 } else { Write-Output "VERDICT : NON QUALIFIE - $finale/10"; exit 1 }
+if ($finale -gt [decimal]9.0) { Write-Output "VERDICT : PRE-QUALIFIE > 9/10 (observation SLA 30 j non achevee)"; exit 0 }
+else { Write-Output "VERDICT : NON QUALIFIE - $finale/10"; exit 1 }
